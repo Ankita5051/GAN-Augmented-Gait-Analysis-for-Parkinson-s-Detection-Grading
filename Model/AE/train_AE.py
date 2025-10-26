@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
+from datetime import datetime
+import pandas as pd
 
 from Model import (MLP_AE, CNN1D_AE, LSTM_AE)
 
@@ -58,10 +60,6 @@ def train_ae(model, train_loader, val_loader, test_loader, lr=0.001, epochs=80, 
         if (epoch + 1) % 5 == 0:
             print(f"Epoch [{epoch+1}/{epochs}] | Train Loss: {avg_train_loss:.6f} | Val Loss: {avg_val_loss:.6f}")
 
-    # Load best model
-    if best_model_state:
-        model.load_state_dict(best_model_state)
-
  
     # Test phase
     model.eval()
@@ -84,15 +82,47 @@ def train_ae(model, train_loader, val_loader, test_loader, lr=0.001, epochs=80, 
     plt.ylabel("MSE Loss")
     plt.title(f"{model.__class__.__name__} Training Curve")
     plt.legend()
-    plt.show()
+    plt.grid(True, alpha=0.3)
 
-    return model, train_losses, val_losses
+    plt.tight_layout()
+    model_name = model.__class__.__name__
+    plt.savefig(f'Images/{model_name}_training_losses.png', dpi=150, bbox_inches='tight')
+    plt.close()
+
+    return model, train_losses, val_losses,avg_test_loss
 
 
 if __name__=='__main__':
     ae1 = MLP_AE(seq_len * 1)
     ae2 = CNN1D_AE(1)
     ae3 = LSTM_AE(seq_len)
-
+    results = []
     for model in [ae1, ae2, ae3]:
-        model,train,val = train_ae(model, train_loader,val_loader,test_loader,lr=1e-3, epochs=30)
+        model, train_losses, val_losses, test_loss = train_ae(model, train_loader, val_loader, test_loader, lr=1e-3, epochs=30)
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        model_name = model.__class__.__name__
+        torch.save(model.state_dict(), f'Trained_model/{model_name}_{timestamp}.pth')
+
+        results.append({
+            'Model Name': model_name,
+            'Epochs': 30, 
+            'Final Train Loss': train_losses[-1],
+            'Final Validation Loss': val_losses[-1],
+            'Test Reconstruction Loss': test_loss,
+        })
+
+    #results in a table and save to a markdown file
+    results_df = pd.DataFrame(results)
+    markdown_content = (
+    "# Autoencoder Training Results\n\n"
+    "In this page, the training results of several Autoencoders are shown. "
+    "The Autoencoders are defined in directory [AE](AE).\n\n"
+    + results_df.to_markdown(index=False)
+)
+
+    # Save results to a markdown file
+    with open('training_AEs_results.md', 'w') as f:
+        
+        f.write(markdown_content)
+
+    print("\nTraining results saved to training_AEs_results.md")
