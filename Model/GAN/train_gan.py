@@ -4,9 +4,10 @@ import os
 import torch
 from dotenv import load_dotenv
 from Model.GAN.model import Generator,Discriminator
-from Model.GAN.cGAN import cGAN
+from Model import (cGAN,cWGAN)
 from Dataset.dataset import train_loader
 from datetime import datetime
+
 load_dotenv()
 device=os.environ.get('DEVICE','cpu') 
 noise_dim=int(os.environ['NOISE_DIM'])
@@ -132,3 +133,26 @@ if __name__=='__main__':
     torch.save(model.generator.state_dict(), f'Trained_model/{model_name}_generator_{timestamp}.pth')
     torch.save(model.discriminator.state_dict(), f'Trained_model/{model_name}_discriminator{timestamp}.pth')
 
+
+
+    # Training cWGAN-GP
+    print("\n" + "="*60)
+    print("Training cWGAN")
+    print("="*60)
+
+    # Initialize new models for WGAN
+    generator_wgan = Generator()
+    discriminator_wgan = Discriminator()
+
+    # Create cWGAN-GP model 
+    cwgan_model = cWGAN(generator_wgan, discriminator_wgan, device)
+
+    # Train cWGAN-GP
+    cwgan_model = train_gan(cwgan_model, train_loader, 30, model_type='cWGAN')
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+  
+    # Save cWGAN-GP model
+    torch.save(cwgan_model.generator.state_dict(), f'Trained_model/cwgan_generator{timestamp}.pth')
+    torch.save(cwgan_model.discriminator.state_dict(), f'Trained_model/cwgan_discriminator{timestamp}.pth')
+
+    print("\nTraining completed!")

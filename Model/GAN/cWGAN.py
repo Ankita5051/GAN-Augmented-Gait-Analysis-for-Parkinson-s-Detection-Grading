@@ -1,15 +1,15 @@
 import torch
 import os
-import torch.nn as nn
 import torch.optim as optim
 
-GP_WEIGHT=int(os.environ['GP_WEIGHT'])
+GP_WEIGHT=float(os.environ['GP_WEIGHT'])
 NOISE_DIM=int(os.environ['NOISE_DIM'])
-lr_g=int(os.environ['LR_G'])
-lr_d=int(os.environ['LR_D'])
+lr_g=float(os.environ['LR_G'])
+lr_d=float(os.environ['LR_D'])
 CRITIC_ITERATIONS = int(os.environ['CRITIC_ITERATIONS'])
-# cWGAN
-class cWGAN_GP:
+
+# cWGAN-GP Training
+class cWGAN:
     def __init__(self, generator, discriminator, device):
         self.generator = generator.to(device)
         self.discriminator = discriminator.to(device)
@@ -20,20 +20,24 @@ class cWGAN_GP:
 
     def gradient_penalty(self, real_data, fake_data, labels):
         batch_size = real_data.size(0)
-
-        # Random weight for interpolation
+        
+        # Ensure real_data and fake_data have the same shape
+        # Expected shape: (batch, seq_len, channels) or (batch, seq_len)
+        if real_data.dim() == 2:
+            real_data = real_data.unsqueeze(-1)
+        if fake_data.dim() == 2:
+            fake_data = fake_data.unsqueeze(-1)
+        
+        # Random weight for interpolation - shape: (batch, 1, 1)
         alpha = torch.rand(batch_size, 1, 1).to(self.device)
-
-        # Reshape real and fake data for broadcasting with alpha
-        real_data = real_data.unsqueeze(-1)
-        fake_data = fake_data.unsqueeze(-1)
-
+        
         # Interpolated data
         interpolated = (alpha * real_data + (1 - alpha) * fake_data).requires_grad_(True)
-
+        
         # Discriminator output for interpolated data
-        d_interpolated = self.discriminator(interpolated.squeeze(-1), labels) # Remove the added dimension for discriminator input
-
+        # Squeeze the last dimension if it's 1 to match discriminator input format
+        d_interpolated = self.discriminator(interpolated.squeeze(-1), labels)
+        
         # Gradients
         gradients = torch.autograd.grad(
             outputs=d_interpolated,
@@ -43,16 +47,21 @@ class cWGAN_GP:
             retain_graph=True,
             only_inputs=True
         )[0]
-
+        
+        # Flatten gradients
         gradients = gradients.view(batch_size, -1)
+        
+        # Calculate gradient penalty
         gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
-
+        
         return gradient_penalty
 
     def train_step(self, real_data, labels):
         batch_size = real_data.size(0)
 
-        # Train Discriminator
+   
+        # Train Discriminator (Critic)
+    
         for _ in range(CRITIC_ITERATIONS):
             self.optimizer_D.zero_grad()
 
@@ -61,7 +70,7 @@ class cWGAN_GP:
             d_loss_real = -torch.mean(real_output)
 
             # Fake data
-            noise = torch.randn(batch_size, NOISE_DIM).to(self.device)
+            noise = torch.randn(batch_size, NOISE_DIM|128).to(self.device)
             fake_data = self.generator(noise, labels).detach()
             fake_output = self.discriminator(fake_data, labels)
             d_loss_fake = torch.mean(fake_output)
@@ -74,7 +83,9 @@ class cWGAN_GP:
             d_loss.backward()
             self.optimizer_D.step()
 
+     
         # Train Generator
+       
         self.optimizer_G.zero_grad()
 
         noise = torch.randn(batch_size, NOISE_DIM).to(self.device)

@@ -2,9 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-# ==============================================================
 # LSTM-based Variational Autoencoder for 1D Sequential Data
-# ==============================================================
 
 class LSTM_VAE(nn.Module):
     def __init__(self, input_dim, hidden_dim, latent_dim, num_layers=1):
@@ -76,10 +74,7 @@ def vae_loss_function(x_recon, x, mu, logvar):
     return recon_loss + kl_loss, recon_loss, kl_loss
 
 
-
 # Training Function
-
-
 def train_lstm_vae(model, train_loader, val_loader, epochs=50, lr=1e-3, patience=10, device='cpu'):
     optimizer = optim.Adam(model.parameters(), lr=lr)
     best_val_loss = float('inf')

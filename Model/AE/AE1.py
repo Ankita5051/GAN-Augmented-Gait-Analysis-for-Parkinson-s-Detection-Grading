@@ -1,6 +1,5 @@
-import os
-import torch
 import torch.nn as nn
+
 class MLP_AE(nn.Module):
     def __init__(self,seq_len):
         super().__init__()

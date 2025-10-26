@@ -32,7 +32,7 @@ def generate_samples(generator, class_label, num_samples):
     return np.array(generated_samples)  # Shape: (num_samples, seq_len)
 
 
-def visualize_random_samples(samples, class_label, num_to_show=2):
+def visualize_random_samples(samples, class_label,model_type, num_to_show=2):
     """Randomly visualize a few generated samples and save plots."""
     if len(samples) == 0:
         print("No samples available for visualization.")
@@ -53,9 +53,9 @@ def visualize_random_samples(samples, class_label, num_to_show=2):
         axes[i].set_ylabel('Amplitude')
         axes[i].grid(True, alpha=0.3)
 
-    plt.suptitle(f'Randomly Selected Samples - Class {class_label} ({class_name})', fontsize=14)
+    plt.suptitle(f'Synthetic Data using {model_type}for - Class {class_label} ({class_name})', fontsize=14)
     plt.tight_layout()
-    plt.savefig(f'{IMG_DIR}/synthetic_class_{class_label}_data.png', dpi=150, bbox_inches='tight')
+    plt.savefig(f'{IMG_DIR}/synthetic_data_class_{class_label}_{model_type}.png', dpi=150, bbox_inches='tight')
     plt.close()
 
 
@@ -66,7 +66,9 @@ if __name__ == '__main__':
 
     # Load trained generator
     model = Generator().to(DEVICE)
-    model.load_state_dict(torch.load('Trained_model/cGAN_generator_20251026132044.pth', map_location=DEVICE))
+    cgan_path='Trained_model/cGAN_generator_20251026132044.pth'
+    cwgan_path='Trained_model/cGAN_generator_20251026132044.pth'
+    model.load_state_dict(torch.load(cgan_path, map_location=DEVICE))
     generator_to_use = model
 
     while True:
@@ -99,7 +101,7 @@ if __name__ == '__main__':
             print(f"\n signals saved to '{csv_filename}'")
 
             # Visualize random samples
-            visualize_random_samples(generated_data, class_label, num_to_show=2)
+            visualize_random_samples(generated_data, class_label,'cWGAN', num_to_show=2)
 
         except ValueError:
             print("Invalid input! Please enter valid numbers.")

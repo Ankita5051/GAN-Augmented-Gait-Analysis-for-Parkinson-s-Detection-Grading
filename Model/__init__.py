@@ -4,5 +4,6 @@ from .AE.AE3 import LSTM_AE
 
 from .GAN.model import Generator,Discriminator
 from .GAN.cGAN import cGAN
+from .GAN.cWGAN import cWGAN
 
-__all__ = [cGAN,Generator,Discriminator] # type: ignore
+__all__ = [cGAN,Generator,Discriminator,cWGAN,cGAN] # type: ignore
