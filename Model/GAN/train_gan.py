@@ -113,25 +113,25 @@ def plot_losses(g_losses, d_losses, model_type):
 
 
 if __name__=='__main__':
-    print("="*60)
-    print("Training cGAN")
-    print("="*60)
+    # print("="*60)
+    # print("Training cGAN")
+    # print("="*60)
 
-    # Initialize models
-    generator_cgan = Generator()
-    discriminator_cgan = Discriminator()
+    # # Initialize models
+    # generator_cgan = Generator()
+    # discriminator_cgan = Discriminator()
 
-    # Create cGAN model
-    model = cGAN(generator_cgan, discriminator_cgan, device)
+    # # Create cGAN model
+    # model = cGAN(generator_cgan, discriminator_cgan, device)
 
-    # Train cGAN
-    model = train_gan(model, train_loader, 50, model_type='cGAN')
+    # # Train cGAN
+    # model = train_gan(model, train_loader, 50, model_type='cGAN')
 
-    # Save cGAN model
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    model_name = model.__class__.__name__
-    torch.save(model.generator.state_dict(), f'Trained_model/{model_name}_generator_{timestamp}.pth')
-    torch.save(model.discriminator.state_dict(), f'Trained_model/{model_name}_discriminator{timestamp}.pth')
+    # # Save cGAN model
+    # timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    # model_name = model.__class__.__name__
+    # torch.save(model.generator.state_dict(), f'Trained_model/{model_name}_generator_{timestamp}.pth')
+    # torch.save(model.discriminator.state_dict(), f'Trained_model/{model_name}_discriminator{timestamp}.pth')
 
 
 
@@ -148,7 +148,7 @@ if __name__=='__main__':
     cwgan_model = cWGAN(generator_wgan, discriminator_wgan, device)
 
     # Train cWGAN-GP
-    cwgan_model = train_gan(cwgan_model, train_loader, 30, model_type='cWGAN')
+    cwgan_model = train_gan(cwgan_model, train_loader, 20, model_type='cWGAN')
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
   
     # Save cWGAN-GP model

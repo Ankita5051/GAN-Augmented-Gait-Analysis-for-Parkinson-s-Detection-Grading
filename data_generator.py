@@ -67,8 +67,8 @@ if __name__ == '__main__':
     # Load trained generator
     model = Generator().to(DEVICE)
     cgan_path='Trained_model/cGAN_generator_20251026132044.pth'
-    cwgan_path='Trained_model/cGAN_generator_20251026132044.pth'
-    model.load_state_dict(torch.load(cgan_path, map_location=DEVICE))
+    cwgan_path='Trained_model/cwgan_generator20251027112037.pth'
+    model.load_state_dict(torch.load(cwgan_path, map_location=DEVICE))
     generator_to_use = model
 
     while True:
