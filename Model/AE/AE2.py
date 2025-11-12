@@ -9,8 +9,12 @@ class CNN1D_AE(nn.Module):
             nn.ReLU(),
             nn.Conv1d(in_channels=16, out_channels=32, kernel_size=3, stride=2, padding=1),
             nn.ReLU(),
+            nn.Conv1d(in_channels=16, out_channels=64, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),
         )
         self.decoder = nn.Sequential(
+            nn.ConvTranspose1d(in_channels=64, out_channels=32, kernel_size=4, stride=2, padding=1),
+            nn.ReLU(),
             nn.ConvTranspose1d(in_channels=32, out_channels=16, kernel_size=4, stride=2, padding=1),
             nn.ReLU(),
             nn.ConvTranspose1d(in_channels=16, out_channels=in_ch, kernel_size=4, stride=2, padding=1),
